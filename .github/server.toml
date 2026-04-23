@@ -1,0 +1,6 @@
+[server]
+bind_addr = "0.0.0.0:2333" # Cổng để máy bạn kết nối tới
+default_token = "lamnguyenkhang220611"
+
+[server.services.my_service]
+bind_addr = "0.0.0.0:2206" # Cổng sẽ mở ra ngoài cho mọi người dùng
