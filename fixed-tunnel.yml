@@ -1,0 +1,21 @@
+name: Fixed IP Tunnel
+on: [workflow_dispatch]
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update DuckDNS IP
+        run: |
+          # Thay 'khang-sv' và 'TOKEN' bằng của bạn
+          curl "https://www.duckdns.org/update?domains=khang-sv&token=CỦA-BẠN-VÀO-ĐÂY&ip="
+      
+      - name: Setup SSH Server
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openssh-server
+          # Thiết lập mật khẩu cho user runner để bạn đăng nhập từ xa
+          echo "runner:lamnguyenkhang2206" | sudo chpasswd
+          sudo service ssh start
+          # Giữ cho action chạy trong 6 tiếng
+          sleep 6h
