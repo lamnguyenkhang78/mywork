@@ -1,37 +1,24 @@
-name: GHA Fixed Server
+name: Cloudflare Fixed VPS
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Chạy thủ công
   schedule:
-    - cron: '0 */5 * * *' # Chạy lại mỗi 5 tiếng
+    - cron: '0 */5 * * *' # Tự động chạy lại mỗi 5 tiếng
 
 jobs:
-  connect:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Install FRP
+      - name: Set Password
+        run: echo "runner:123" | sudo chpasswd
+
+      - name: Install Cloudflared
         run: |
-          wget https://github.com/fatedier/frp/releases/download/v0.54.0/frp_0.54.0_linux_amd64.tar.gz
-          tar -xvf frp_0.54.0_linux_amd64.tar.gz
-          cp frp_0.54.0_linux_amd64/frpc .
+          curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
 
-      - name: Start Tunnel to DuckDNS Domain
+      - name: Start Tunnel
         run: |
-          # Cấu hình kết nối thẳng tới domain DuckDNS của bạn
-          cat <<EOF > frpc.toml
-          serverAddr = "congdongbanthan.duckdns.org"
-          serverPort = 7000
-          auth.token = "${{ secrets.FRP_TOKEN }}"
-
-          [[proxies]]
-          name = "gha-fixed-service"
-          type = "tcp"
-          localIP = "127.0.0.1"
-          localPort = 8080   # Cổng ứng dụng trên GHA
-          remotePort = 9000  # Cổng cố định trên VPS bạn sẽ truy cập
-          EOF
-
-          # Vòng lặp giữ kết nối luôn sống
-          while true; do
-            ./frpc -c frpc.toml
-            sleep 10
-          done
+          # Kết nối đến Cloudflare bằng Token đã lưu
+          cloudflared tunnel --no-autoupdate run --token ${{ secrets.CF_TUNNEL_TOKEN }} &
+          # Giữ cho Workflow không bị dừng (chạy trong 6 tiếng)
+          sleep 21600
