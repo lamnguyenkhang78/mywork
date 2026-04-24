@@ -1,0 +1,11 @@
+- name: Start Fixed Tunnel
+        run: |
+          sudo systemctl start ssh
+          # Mình dùng một mã ngẫu nhiên: khangvps789987 (bạn có thể đổi tùy ý)
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -f -N -R khangvps789987:80:localhost:22 serveo.net
+          
+          echo "------------------------------------------------------------"
+          echo "ĐỊA CHỈ KẾT NỐI CỐ ĐỊNH CỦA BẠN:"
+          echo "ssh runner@khangvps789987.serveo.net"
+          echo "Mật khẩu: 123"
+          echo "------------------------------------------------------------"
