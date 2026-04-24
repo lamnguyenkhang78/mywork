@@ -24,7 +24,7 @@ jobs:
           # -o StrictHostKeyChecking=no: Tự động nhấn "yes" khi được hỏi tin tưởng server
           # -f: Chạy SSH ở chế độ nền (background)
           # -N: Không thực thi lệnh nào sau khi kết nối, chỉ giữ tunnel
-          ssh -o StrictHostKeyChecking=no -f -N -R 80:localhost:22 serveo.net
+          ssh -o StrictHostKeyChecking=no -f -N -R congdongbanthan:80:localhost:22 serveo.net
           
           echo "Tunnel started! Checking for public URL..."
           
