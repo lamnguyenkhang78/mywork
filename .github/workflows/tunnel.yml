@@ -1,0 +1,18 @@
+name: GHA VPS DuckDNS
+on: workflow_dispatch
+
+jobs:
+  vps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update DuckDNS IP
+        run: |
+          # Dùng Token và Domain từ ảnh bạn gửi
+          curl "https://www.duckdns.org/update?domains=congdongbanthan&token=8fe3c35e-d779-45d3-8851-22e4c6fefaf1&ip="
+
+      - name: Setup SSH & Tunnel
+        run: |
+          echo "runner:123" | sudo chpasswd
+          # Cài đặt công cụ đục tường lửa (ví dụ Serveo hoặc Localtonet)
+          # Vì IP GitHub không mở port, bạn VẪN PHẢI dùng một Tunnel
+          ssh -R 80:localhost:22 serveo.net
