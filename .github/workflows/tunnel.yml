@@ -1,4 +1,4 @@
-name: GHA VPS DuckDNS
+name: GHA VPS DuckDNS Fixed
 on: workflow_dispatch
 
 jobs:
@@ -7,12 +7,33 @@ jobs:
     steps:
       - name: Update DuckDNS IP
         run: |
-          # Dùng Token và Domain từ ảnh bạn gửi
-          curl "https://www.duckdns.org/update?domains=congdongbanthan&token=8fe3c35e-d779-45d3-8851-22e4c6fefaf1&ip="
+          # Cập nhật IP của máy ảo GitHub lên DuckDNS
+          curl -s "https://www.duckdns.org/update?domains=congdongbanthan&token=8fe3c35e-d779-45d3-8851-22e4c6fefaf1&ip="
+          echo "DuckDNS updated!"
 
-      - name: Setup SSH & Tunnel
+      - name: Setup SSH & Start Tunnel
         run: |
+          # Thiết lập mật khẩu cho user runner
           echo "runner:123" | sudo chpasswd
-          # Cài đặt công cụ đục tường lửa (ví dụ Serveo hoặc Localtonet)
-          # Vì IP GitHub không mở port, bạn VẪN PHẢI dùng một Tunnel
-          ssh -R 80:localhost:22 serveo.net
+          
+          # Cấu hình SSH Server để cho phép đăng nhập bằng mật khẩu
+          sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+          sudo systemctl restart ssh
+
+          # CHỖ QUAN TRỌNG: Lệnh SSH Tunnel đã fix lỗi
+          # -o StrictHostKeyChecking=no: Tự động nhấn "yes" khi được hỏi tin tưởng server
+          # -f: Chạy SSH ở chế độ nền (background)
+          # -N: Không thực thi lệnh nào sau khi kết nối, chỉ giữ tunnel
+          ssh -o StrictHostKeyChecking=no -f -N -R 80:localhost:22 serveo.net
+          
+          echo "Tunnel started! Checking for public URL..."
+          
+          # Đợi một chút để lấy URL từ log (tùy chọn)
+          sleep 5
+
+      - name: Keep Alive
+        run: |
+          echo "VPS đang chạy vĩnh viễn (tối đa 6 tiếng)..."
+          echo "Kết nối qua: ssh runner@serveo.net (nếu bạn dùng alias cố định)"
+          # Giữ máy ảo không bị tắt
+          sleep 21600
