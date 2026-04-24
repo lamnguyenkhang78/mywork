@@ -1,32 +1,23 @@
-name: FRP Fixed Tunnel
+name: Boringproxy Fixed Tunnel
 on: [workflow_dispatch]
 
 jobs:
-  frp-server:
+  server:
     runs-on: ubuntu-latest
     steps:
       - name: Update DuckDNS
         run: |
           curl "https://www.duckdns.org/update?domains=congdongbanthan&token=8fe3c35e-d779-45d3-8851-22e4c6fefaf1&ip="
 
-      - name: Install FRP
+      - name: Setup Boringproxy
         run: |
-          wget https://github.com/fatedier/frp/releases/download/v0.54.0/frp_0.54.0_linux_amd64.tar.gz
-          tar -zxvf frp_0.54.0_linux_amd64.tar.gz
-          cd frp_0.54.0_linux_amd64
+          wget https://github.com/boringproxy/boringproxy/releases/download/v0.8.0/boringproxy-linux-x86_64
+          chmod +x boringproxy-linux-x86_64
+          # Chạy server với password là lamnguyenkhang2206
+          # Server này sẽ nhận kết nối ngược từ máy bạn ra (Outbound) nên không bị chặn
+          ./boringproxy-linux-x86_64 server -admin-config-dir ./conf -cert-domain congdongbanthan.duckdns.org &
           
-          # Tạo file cấu hình server (frps)
-          echo "[common]
-          bind_port = 7000
-          token = lamnguyenkhang2206" > frps.toml
-          
-          # Chạy server trong nền
-          ./frps -c frps.toml &
-          
-          # Cài SSH để bạn thông cổng
-          sudo apt update && sudo apt install -y openssh-server
-          echo "runner:lamnguyenkhang2206" | sudo chpasswd
-          sudo service ssh start
-          
-          echo "Server online tại congdongbanthan.duckdns.org:7000"
+          echo "Đang đợi máy chủ sẵn sàng..."
+          sleep 10
+          echo "Máy chủ đã online tại congdongbanthan.duckdns.org"
           sleep 6h
