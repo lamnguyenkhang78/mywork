@@ -1,11 +1,22 @@
-- name: Start Fixed Tunnel
+name: GHA VPS Fixed
+on: workflow_dispatch
+
+jobs:
+  vps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH & Tunnel
         run: |
+          # 1. Cấu hình SSH Server
           sudo systemctl start ssh
-          # Mình dùng một mã ngẫu nhiên: khangvps789987 (bạn có thể đổi tùy ý)
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -f -N -R khangvps789987:80:localhost:22 serveo.net
+          echo "runner:123" | sudo chpasswd
+          sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+          sudo systemctl restart ssh
+
+          # 2. Khởi tạo Tunnel (Dùng tên khangvps789987)
+          echo "-----------------------------------------------------"
+          echo "DANG KET NOI DEN SERVEO..."
+          echo "-----------------------------------------------------"
           
-          echo "------------------------------------------------------------"
-          echo "ĐỊA CHỈ KẾT NỐI CỐ ĐỊNH CỦA BẠN:"
-          echo "ssh runner@khangvps789987.serveo.net"
-          echo "Mật khẩu: 123"
-          echo "------------------------------------------------------------"
+          # Lệnh này sẽ chạy và giữ kết nối luôn (không dùng -f để bạn xem log)
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -R khangvps789987:80:localhost:22 serveo.net
