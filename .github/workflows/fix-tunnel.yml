@@ -1,0 +1,37 @@
+name: GHA Fixed Server
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */5 * * *' # Chạy lại mỗi 5 tiếng
+
+jobs:
+  connect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install FRP
+        run: |
+          wget https://github.com/fatedier/frp/releases/download/v0.54.0/frp_0.54.0_linux_amd64.tar.gz
+          tar -xvf frp_0.54.0_linux_amd64.tar.gz
+          cp frp_0.54.0_linux_amd64/frpc .
+
+      - name: Start Tunnel to DuckDNS Domain
+        run: |
+          # Cấu hình kết nối thẳng tới domain DuckDNS của bạn
+          cat <<EOF > frpc.toml
+          serverAddr = "congdongbanthan.duckdns.org"
+          serverPort = 7000
+          auth.token = "${{ secrets.FRP_TOKEN }}"
+
+          [[proxies]]
+          name = "gha-fixed-service"
+          type = "tcp"
+          localIP = "127.0.0.1"
+          localPort = 8080   # Cổng ứng dụng trên GHA
+          remotePort = 9000  # Cổng cố định trên VPS bạn sẽ truy cập
+          EOF
+
+          # Vòng lặp giữ kết nối luôn sống
+          while true; do
+            ./frpc -c frpc.toml
+            sleep 10
+          done
