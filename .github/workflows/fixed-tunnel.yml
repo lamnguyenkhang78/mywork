@@ -1,31 +1,32 @@
-name: Gost Fixed Tunnel
+name: FRP Fixed Tunnel
 on: [workflow_dispatch]
 
 jobs:
-  relay:
+  frp-server:
     runs-on: ubuntu-latest
     steps:
       - name: Update DuckDNS
         run: |
-          # Giữ IP cố định qua DuckDNS của bạn
           curl "https://www.duckdns.org/update?domains=congdongbanthan&token=8fe3c35e-d779-45d3-8851-22e4c6fefaf1&ip="
 
-      - name: Install Gost
+      - name: Install FRP
         run: |
-          wget https://github.com/go-gost/gost/releases/download/v3.0.0-rc10/gost_3.0.0-rc10_linux_amd64.tar.gz
-          tar -zxvf gost_3.0.0-rc10_linux_amd64.tar.gz
-          chmod +x gost
-
-      - name: Start Gost Relay
-        run: |
-          # Lắng nghe kết nối SSH Reverse từ máy bạn và mở cổng 2206 cho mọi người
-          # Bước này biến GitHub thành trạm trung chuyển
-          ./gost -L tcp://:2206/127.0.0.1:2206 &
+          wget https://github.com/fatedier/frp/releases/download/v0.54.0/frp_0.54.0_linux_amd64.tar.gz
+          tar -zxvf frp_0.54.0_linux_amd64.tar.gz
+          cd frp_0.54.0_linux_amd64
           
-          # Cài SSH Server để bạn kết nối từ máy nhà
+          # Tạo file cấu hình server (frps)
+          echo "[common]
+          bind_port = 7000
+          token = lamnguyenkhang2206" > frps.toml
+          
+          # Chạy server trong nền
+          ./frps -c frps.toml &
+          
+          # Cài SSH để bạn thông cổng
           sudo apt update && sudo apt install -y openssh-server
           echo "runner:lamnguyenkhang2206" | sudo chpasswd
           sudo service ssh start
           
-          echo "Server dang san sang tai: congdongbanthan.duckdns.org"
+          echo "Server online tại congdongbanthan.duckdns.org:7000"
           sleep 6h
