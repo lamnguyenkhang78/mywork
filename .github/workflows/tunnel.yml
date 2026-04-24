@@ -1,38 +1,11 @@
-name: GHA VPS DuckDNS Fixed
-on: workflow_dispatch
-
-jobs:
-  vps:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Update DuckDNS IP
+- name: Start Fixed Tunnel
         run: |
-          # Cập nhật IP GitHub lên DuckDNS để theo dõi
-          curl -s "https://www.duckdns.org/update?domains=congdongbanthan&token=8fe3c35e-d779-45d3-8851-22e4c6fefaf1&ip="
-          echo "DuckDNS updated!"
-
-      - name: Setup SSH & Start Tunnel
-        run: |
-          # Thiết lập mật khẩu cho user runner
-          echo "runner:123" | sudo chpasswd
+          sudo systemctl start ssh
+          # Mình dùng một mã ngẫu nhiên: khangvps789987 (bạn có thể đổi tùy ý)
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -f -N -R khangvps789987:80:localhost:22 serveo.net
           
-          # Cho phép đăng nhập SSH bằng mật khẩu
-          sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-          sudo systemctl restart ssh
-
-          # KẾT NỐI VỚI ALIAS CỐ ĐỊNH: congdongbanthan
-          # Chúng ta dùng cổng 80 của Serveo để forward vào cổng 22 của máy ảo
-          ssh -o StrictHostKeyChecking=no -f -N -R congdongbanthan:80:localhost:22 serveo.net
-          
-          echo "Tunnel đang khởi tạo với địa chỉ: congdongbanthan.serveo.net"
-          sleep 5
-
-      - name: Keep Alive
-        run: |
           echo "------------------------------------------------------------"
-          echo "VPS ĐANG CHẠY TRONG 6 TIẾNG!"
-          echo "Địa chỉ kết nối cố định: ssh runner@congdongbanthan.serveo.net"
+          echo "ĐỊA CHỈ KẾT NỐI CỐ ĐỊNH CỦA BẠN:"
+          echo "ssh runner@khangvps789987.serveo.net"
           echo "Mật khẩu: 123"
           echo "------------------------------------------------------------"
-          # Giữ máy ảo sống
-          sleep 21600
