@@ -8,21 +8,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup SSH Server
+      - name: Update DuckDNS
         run: |
-          sudo apt-get update
-          sudo apt-get install -y openssh-server
-          # Thiết lập mật khẩu cho user runner để bạn đăng nhập
-          echo "runner:lamnguyenkhang2206" | sudo chpasswd
-          sudo service ssh start
-          
-      - name: Update DuckDNS IP
-        run: |
-          # Đã thay domain 'congdongbanthan' và Token từ ảnh của bạn
+          # Cập nhật IP máy ảo lên DuckDNS
           curl "https://www.duckdns.org/update?domains=congdongbanthan&token=8fe3c35e-d779-45d3-8851-22e4c6fefaf1&ip="
-          echo -e "\n-----------------------------------"
-          echo "IP đã được cập nhật lên congdongbanthan.duckdns.org"
-          echo "-----------------------------------"
 
-      - name: Keep Alive
-        run: sleep 6h # Server sẽ chạy liên tục trong 6 tiếng
+      - name: Setup Tmate Session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: false # Cho phép bạn kết nối từ máy tính
