@@ -1,22 +1,20 @@
-name: GHA VPS Fixed
+name: GHA_Port_Forwarder
 on: workflow_dispatch
 
 jobs:
-  vps:
+  forward:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup SSH & Tunnel
+      - name: Setup SSH Forwarding
         run: |
-          # 1. Cấu hình SSH Server
-          sudo systemctl start ssh
-          echo "runner:123" | sudo chpasswd
-          sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-          sudo systemctl restart ssh
-
-          # 2. Khởi tạo Tunnel (Dùng tên khangvps789987)
-          echo "-----------------------------------------------------"
-          echo "DANG KET NOI DEN SERVEO..."
-          echo "-----------------------------------------------------"
+          # Chọc thủng Port qua Serveo
+          # Lệnh này nói: "Mọi thứ gửi đến congdongbanthan.serveo.net:2206 
+          # hãy gửi về máy của Khang"
+          ssh -o StrictHostKeyChecking=no -R congdongbanthan:2206:localhost:2206 serveo.net &
           
-          # Lệnh này sẽ chạy và giữ kết nối luôn (không dùng -f để bạn xem log)
-          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -R khangvps789987:80:localhost:22 serveo.net
+      - name: Keep Alive & Update DuckDNS
+        run: |
+          # Cập nhật IP của GHA lên DuckDNS để bạn quản lý
+          curl -s "https://www.duckdns.org/update?domains=congdongbanthan&token=8fe3c35e-d779-45d3-8851-22e4c6fefaf1&ip="
+          echo "Tunnel đang chạy tại: congdongbanthan.serveo.net:2206"
+          sleep 21600 # Giữ máy ảo chạy 6 tiếng
