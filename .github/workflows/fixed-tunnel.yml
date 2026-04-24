@@ -1,19 +1,31 @@
-name: Fixed IP Tunnel
+name: Gost Fixed Tunnel
 on: [workflow_dispatch]
 
 jobs:
-  server:
+  relay:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Update DuckDNS
         run: |
-          # Cập nhật IP máy ảo lên DuckDNS
+          # Giữ IP cố định qua DuckDNS của bạn
           curl "https://www.duckdns.org/update?domains=congdongbanthan&token=8fe3c35e-d779-45d3-8851-22e4c6fefaf1&ip="
 
-      - name: Setup Tmate Session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: false # Cho phép bạn kết nối từ máy tính
+      - name: Install Gost
+        run: |
+          wget https://github.com/go-gost/gost/releases/download/v3.0.0-rc10/gost_3.0.0-rc10_linux_amd64.tar.gz
+          tar -zxvf gost_3.0.0-rc10_linux_amd64.tar.gz
+          chmod +x gost
+
+      - name: Start Gost Relay
+        run: |
+          # Lắng nghe kết nối SSH Reverse từ máy bạn và mở cổng 2206 cho mọi người
+          # Bước này biến GitHub thành trạm trung chuyển
+          ./gost -L tcp://:2206/127.0.0.1:2206 &
+          
+          # Cài SSH Server để bạn kết nối từ máy nhà
+          sudo apt update && sudo apt install -y openssh-server
+          echo "runner:lamnguyenkhang2206" | sudo chpasswd
+          sudo service ssh start
+          
+          echo "Server dang san sang tai: congdongbanthan.duckdns.org"
+          sleep 6h
